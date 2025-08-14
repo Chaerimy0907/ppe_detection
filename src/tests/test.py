@@ -35,6 +35,17 @@ def detection():
         if not ret:
             break
 
+        result_frame, is_detected = detect_yellow_hardhat(frame)
+
+        if is_detected:
+            msg = "Hardhat O"
+            color = (0, 255, 0)
+
+        else:
+            msg = "Hardhat X"
+            color = (0, 0, 255)
+
+        cv2.putText(result_frame, msg, (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv2.LINE_AA)
         cv2.imshow("Yellow Hardhat Detection", result_frame)
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
