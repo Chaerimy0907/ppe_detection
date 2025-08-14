@@ -7,7 +7,7 @@ import cv2
 
 def detect_yellow_hardhat(img_path):
     # YOLO 모델
-    model = YOLO('yolo11n.pt')
+    model = YOLO('best.pt')
 
     # 클래스 이름 정의
     hardhat_classes = ['Hardhat', 'NO-Hardhat']
@@ -27,10 +27,17 @@ def detect_yellow_hardhat(img_path):
                 detect_hardhat = True
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
                 
-                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                cv2.putText(img, f'{label} (conf:.2f)', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
-                
+                color = (0, 255, 0) if label == 'Hardhat' else (0, 0, 255)
+                cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
+                cv2.putText(img, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
 
+    if detect_hardhat:
+        cv2.putText(img, "Hardhat O", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
+    
+    else:
+        cv2.putText(img, "Hardhat X", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+
+    cv2.imshow("Detection Hardhat", img)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
