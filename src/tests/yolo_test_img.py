@@ -29,13 +29,13 @@ def detect_yellow_hardhat(img_path):
                 
                 color = (0, 255, 0) if label == 'Hardhat' else (0, 0, 255)
                 cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
-                cv2.putText(img, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
+                cv2.putText(img, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-    if detect_hardhat:
-        cv2.putText(img, "Hardhat O", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
+    # if detect_hardhat:
+    #     cv2.putText(img, "Hardhat O", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
     
-    else:
-        cv2.putText(img, "Hardhat X", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+    # else:
+    #     cv2.putText(img, "Hardhat X", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
 
     cv2.imshow("Detection Hardhat", img)
     cv2.waitKey(0)
