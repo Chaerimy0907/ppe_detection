@@ -10,8 +10,13 @@ import cv2
 import numpy as np
 
 # 노란색 안전모 감지 함수
-def detect_yellow_hardhat(frame):
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+def detect_yellow_hardhat(img_path):
+    img = cv2.imread(img_path)
+    if img is None:
+        print("Failed", img_path)
+        return
+    
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
     yellow_lower = (20, 100, 100)
     yellow_upper = (30, 255 ,255)
 
@@ -22,37 +27,26 @@ def detect_yellow_hardhat(frame):
     for cnt in contours:
         if cv2.contourArea(cnt) > 1000:
             x, y, w, h = cv2.boundingRect(cnt)
-            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 2)
+            cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 255), 2)
             detected = True
-    return frame, detected
 
-# 감지 실행 함수
-def detection():
-    cap = cv2.VideoCapture(0)
+    if detected:
+        msg = "Hardhat O"
+        color = (0, 255, 0)
 
-    while True:
-        ret, frame = cap.read()
-        if not ret:
-            break
+    else:
+        msg = "Hardhat X"
+        color = (0, 0, 255)
 
-        result_frame, is_detected = detect_yellow_hardhat(frame)
+    cv2.putText(img, msg, (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv2.LINE_AA)
+    cv2.imshow("Yellow Hardhat Detection", img)
 
-        if is_detected:
-            msg = "Hardhat O"
-            color = (0, 255, 0)
+    # if cv2.waitKey(1) & 0xFF == ord('q'):
+    # break
 
-        else:
-            msg = "Hardhat X"
-            color = (0, 0, 255)
-
-        cv2.putText(result_frame, msg, (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2, cv2.LINE_AA)
-        cv2.imshow("Yellow Hardhat Detection", result_frame)
-
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-    cap.release()
+    #cap.release()
+    cv2.waitKey(0)
     cv2.destroyAllWindows()
 
 if __name__=="__main__":
-    detection()
+    detect_yellow_hardhat('./img/1.jpg')
