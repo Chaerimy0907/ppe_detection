@@ -13,7 +13,7 @@ def detect_yellow_hardhat(img_path):
     hardhat_classes = ['Hardhat', 'NO-Hardhat']
     results = model(img_path)
 
-    cv2.imread(img_path)
+    img = cv2.imread(img_path)
     detect_hardhat = False
 
     for result in results:
@@ -23,6 +23,13 @@ def detect_yellow_hardhat(img_path):
             conf = float(box.conf[0])
             label = model.names[cls_id]
 
+            if label in ['Hardhat', 'NO-Hardhat'] and conf>0.5 :
+                detect_hardhat = True
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                
+                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                cv2.putText(img, f'{label} (conf:.2f)', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+                
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
