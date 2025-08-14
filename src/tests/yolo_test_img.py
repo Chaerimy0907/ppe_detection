@@ -1,6 +1,9 @@
 '''
 opencv로 테스트했을 때 안전모가 아닌 부분까지 감지되어
 yolo를 사용해 조금 더 정밀한 감지 테스트
+
+yolo11n.pt에 Hardhat 클래스가 없음
+https://github.com/snehilsanyal/Construction-Site-Safety-PPE-Detection/tree/main 이곳에서 best.pt를 받아 적용
 '''
 from ultralytics import YOLO
 import cv2

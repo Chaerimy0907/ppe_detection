@@ -11,20 +11,32 @@ import numpy as np
 
 # 노란색 안전모 감지 함수
 def detect_yellow_hardhat(frame):
+    # BGR 이미지를 HSV 색상으로 변환
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    # 노란색 범위 지정 (HSV 기준)
     yellow_lower = (20, 100, 100)
     yellow_upper = (30, 255 ,255)
 
+    # 노란색 영역만 마스크로 검출
     mask = cv2.inRange(hsv, yellow_lower, yellow_upper)
+    
+    # 윤곽선 검출
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
+    # 안전모 감지 여부 변수
     detected = False
+
     for cnt in contours:
+        # 너무 작은 객체는 무시
         if cv2.contourArea(cnt) > 1000:
+            # 객체의 경계 사각형 좌표 구하기
             x, y, w, h = cv2.boundingRect(cnt)
+            
+            # 감지된 객체에 사각형 그리기
             cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 2)
-            detected = True
-    return frame, detected
+            detected = True     # 안전모 감지됨
+    return frame, detected  # 처리된 frame과 감지 결과를 반환
 
 # 감지 실행 함수
 def detection():
