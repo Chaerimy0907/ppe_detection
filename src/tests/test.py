@@ -4,6 +4,7 @@
 면적 필터링 : 노이즈 제거
 
 # 1단계 : 노란색 안전모 검출
+- 테스트를 위해 사진으로 감지 실행
 '''
 import cv2
 import numpy as np
@@ -13,6 +14,17 @@ def detect_yellow_hardhat(frame):
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     yellow_lower = (20, 100, 100)
     yellow_upper = (30, 255 ,255)
+
+    mask = cv2.inRange(hsv, yellow_lower, yellow_upper)
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    detected = False
+    for cnt in contours:
+        if cv2.contourArea(cnt) > 1000:
+            x, y, w, h = cv2.boundingRect(cnt)
+            cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 255), 2)
+            detected = True
+    return frame, detected
 
 # 감지 실행 함수
 def detection():
