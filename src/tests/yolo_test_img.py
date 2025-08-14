@@ -6,6 +6,12 @@ from ultralytics import YOLO
 import cv2
 
 def detect_yellow_hardhat(img_path):
+    # YOLO 모델
+    model = YOLO('yolo11n.pt')
+
+    # 클래스 이름 정의
+    hardhat_classes = ['Hardhat', 'NO-Hardhat']
+    results = model(img_path)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
