@@ -1,10 +1,7 @@
 PPE DETECTION
-========
-
-연희 미니 프로젝트
 ===========
 
-PPE 감지
+PPE 감지 및 아크 플래시 감지
 
 ## 관련 제품 (링크)
 - [hikvision](https://www.hikvision.com/korean/products/IP-Products/Network-Cameras/DeepinView-Series/ids-2cd75c5g0-izhs-y--r-/)
