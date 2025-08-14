@@ -28,8 +28,19 @@ def detect_yellow_hardhat(frame):
 
 # 감지 실행 함수
 def detection():
+    cap = cv2.VideoCapture(0)
 
-    cv2.waitKey(0)
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        cv2.imshow("Yellow Hardhat Detection", result_frame)
+
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
     cv2.destroyAllWindows()
 
 if __name__=="__main__":
