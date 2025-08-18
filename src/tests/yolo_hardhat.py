@@ -24,7 +24,7 @@ def calculate_iou(boxA, boxB):
 # 영상 내 여러 사람의 안전모 착용 여부를 탐지하는 메인 함수
 def detect_hardhat_multi(video_path):
     # YOLO 모델
-    model = YOLO('best.pt')
+    model = YOLO('ppe.pt')
 
     # 비디오 파일 열기
     cap = cv2.VideoCapture(video_path)
@@ -113,6 +113,17 @@ def detect_hardhat_multi(video_path):
         cv2.putText(frame, f'Wearing Person : {wearing_count}', (30, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
         cv2.putText(frame, f'Percentage : {ratio:.1f}%', (30, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
 
+        # 2명 이상 미착용 시 경고 표시
+        if total - wearing_count >= 2:
+            cv2.putText(frame, f'NO-Wearing too much', (30, 160), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (0, 0, 255), 3)
+
+        #결과 출력
+        cv2.imshow('Hardhat Monitoring', frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    cap.release()
+    cv2.destroyAllWindows()
 
         #             # 색상 구분
         #             color = (0, 255, 0) if label == 'Hardhat' else (0, 0, 255)
@@ -142,9 +153,6 @@ def detect_hardhat_multi(video_path):
         # if cv2.waitKey(1) & 0xFF == ord('q'):
         #     break
 
-    cap.release()
-    cv2.destroyAllWindows()
-
 # 메인 함수 실행
 if __name__ == "__main__":
-    detect_hardhat('./img/hardhat.mp4')
+    detect_hardhat_multi('./img/hardhat.mp4')
