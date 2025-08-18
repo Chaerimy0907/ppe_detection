@@ -2,18 +2,24 @@ from ultralytics import YOLO
 import time
 import cv2
 
-def detect_yellow_hardhat(img_path):
+def detect_hardhat(video_path):
     # YOLO 모델
     model = YOLO('best.pt')
 
     # 클래스 이름 정의
-    hardhat_classes = ['Hardhat', 'NO-Hardhat']
+    #class_names = model.names
     
     # 객체 탐지
-    results = model(img_path)
+    #results = model(img_path)
 
-    img = cv2.imread(img_path)
-    detect_hardhat = False
+    #img = cv2.imread(img_path)
+    #detect_hardhat = False
+
+    # 비디오 파일 열기
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print("동영상 읽기 실패")
+        return
 
     # 탐지 결과 반복
     for result in results:
