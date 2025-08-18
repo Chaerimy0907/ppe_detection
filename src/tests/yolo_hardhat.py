@@ -21,8 +21,8 @@ def calculate_iou(boxA, boxB):
     # IoU = 교차 영역 / (합집합 영역)
     return interArea / float(boxAArea + boxBArea - interArea)
 
-
-def detect_hardhat(video_path):
+# 영상 내 여러 사람의 안전모 착용 여부를 탐지하는 메인 함수
+def detect_hardhat_multi(video_path):
     # YOLO 모델
     model = YOLO('best.pt')
 
@@ -32,18 +32,18 @@ def detect_hardhat(video_path):
         print("동영상 읽기 실패")
         return
     
-    # FPS 값 추출 (프레임 간 시간 계산용)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    frame_interval = 1 / fps    # 한 프레임당 걸리는 시간
+    # # FPS 값 추출 (프레임 간 시간 계산용)
+    # fps = cap.get(cv2.CAP_PROP_FPS)
+    # frame_interval = 1 / fps    # 한 프레임당 걸리는 시간
 
-    # 착용 시간 누적 변수
-    wear_time = 0
+    # # 착용 시간 누적 변수
+    # wear_time = 0
 
-    # 연속 미착용 프레임 수를 카운트하기 위한 변수
-    no_wear_count = 0
+    # # 연속 미착용 프레임 수를 카운트하기 위한 변수
+    # no_wear_count = 0
 
-    # 경고 기준 : 5초 동안 미착용
-    no_wear_threshold = int(fps * 3)
+    # # 경고 기준 : 5초 동안 미착용
+    # no_wear_threshold = int(fps * 3)
 
     while True:
         ret, frame = cap.read()
@@ -52,7 +52,11 @@ def detect_hardhat(video_path):
 
         # 현재 프레임에서 객체 탐지 수행
         results = model(frame)
-        wearing = False # 기본값 : 착용 안 함
+
+        # 탐지된 객체들을 클래스별로 저장할 리스트
+        person_boxes = []       # 사람
+        hardhat_boxes = []      # 안전모
+        no_hardhat_boxes = []   # 미착용
 
         # 탐지 결과 반복
         for result in results:
