@@ -34,23 +34,34 @@ def detect_hardhat(video_path):
     # 경고 기준 : 5초 동안 미착용
     no_wear_threshold = int(fps * 3)
 
-    # 탐지 결과 반복
-    for result in results:
-        boxes = result.boxes
-        for box in boxes:
-            cls_id = int(box.cls[0])
-            conf = float(box.conf[0])
-            label = model.names[cls_id]
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
 
-            # 안전모만 필터링
-            if label in ['Hardhat', 'NO-Hardhat'] and conf>0.5 :
-                detect_hardhat = True
-                x1, y1, x2, y2 = map(int, box.xyxy[0])
+        # 현재 프레임에서 객체 탐지 수행
+        results = model(frame)
+        wearing = False # 기본값 : 착용 안 함
+
+        # 탐지 결과 반복
+        for result in results:
+            boxes = result.boxes
+            for box in boxes:
+                cls_id = int(box.cls[0])        # 클래스 ID
+                conf = float(box.conf[0])       # 신뢰도    
+                label = model.names[cls_id]     # 클래스 이름
+
+                # 안전모만 필터링
+                if label in ['Hardhat', 'NO-Hardhat'] and conf>0.5 :
+                    #detect_hardhat = True
+                    x1, y1, x2, y2 = map(int, box.xyxy[0])
                 
-                # 색상 구분
-                color = (0, 255, 0) if label == 'Hardhat' else (0, 0, 255)
-                cv2.rectangle(img, (x1, y1), (x2, y2), color, 2)
-                cv2.putText(img, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+                    # 색상 구분
+                    color = (0, 255, 0) if label == 'Hardhat' else (0, 0, 255)
+
+                    # 컨투어 박스와 라벨 시각화
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+                    cv2.putText(frame, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
     # if detect_hardhat:
     #     cv2.putText(img, "Hardhat O", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
