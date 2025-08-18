@@ -63,11 +63,16 @@ def detect_hardhat(video_path):
                     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                     cv2.putText(frame, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
-    # if detect_hardhat:
-    #     cv2.putText(img, "Hardhat O", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 3)
-    
-    # else:
-    #     cv2.putText(img, "Hardhat X", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+                    # 착용 감지시
+                    if label == 'Hardhat':
+                        wearing = True
+
+        # 착용 상태에 따라 시간 및 경고 카운트 갱신
+        if wearing:
+            wear_time += frame_interval # 착용 시간 누적
+            no_wear_count = 0           # 경고 초기화
+        else:
+            no_wear_count += 1
 
     # 결과 출력
     cv2.imshow("Detection Hardhat", img)
