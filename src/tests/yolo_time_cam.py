@@ -73,10 +73,9 @@ def detect_hardhat(video_path):
             no_wear_count = 0           # 경고 초기화
         else:
             no_wear_count += 1
-
-        # 착용 시간 텍스트 출력
-        time_msg = f'착용 시간 : {wear_time:.1f}초'
-        cv2.putText(frame, "Warning!", (30, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+            # 착용 시간 텍스트 출력
+            time_msg = f'착용 시간 : {wear_time:.1f}초'
+            cv2.putText(frame, "Warning!", (30, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
 
         # 결과 출력
         cv2.imshow("Detection Hardhat", frame)
@@ -90,4 +89,4 @@ def detect_hardhat(video_path):
 
 # 메인 함수 실행
 if __name__ == "__main__":
-    detect_hardhat('./img/1.jpg')
+    detect_hardhat('./img/hardhat.mp4')
