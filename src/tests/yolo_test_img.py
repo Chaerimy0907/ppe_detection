@@ -6,6 +6,7 @@ yolo11n.pt에 Hardhat 클래스가 없음
 https://github.com/snehilsanyal/Construction-Site-Safety-PPE-Detection/tree/main 이곳에서 best.pt를 받아 적용
 '''
 from ultralytics import YOLO
+import time
 import cv2
 
 def detect_yellow_hardhat(img_path):
