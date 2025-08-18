@@ -1,19 +1,30 @@
 from ultralytics import YOLO
-import time
 import cv2
+
+# 두 바운딩 박스 간의 IoU(Intersection over Union)를 계산하는 함수
+def calculate_iou(boxA, boxB):
+    # 교차 영역 좌표 계산
+    xA = max(boxA[0], boxB[0])
+    yA = max(boxA[1], boxB[1])
+    xB = min(boxA[2], boxB[2])
+    yB = min(boxA[3], boxB[3])
+
+    # 교차 영역의 넓이 계산
+    interArea = max(0, xB - xA) * max(0, yB - yA)
+    if interArea == 0:
+        return 0.0
+    
+    # 각 박스의 넓이 계산
+    boxAArea = (boxA[2] - boxA[0]) * (boxA[3] - boxA[1])
+    boxBArea = (boxB[2] - boxB[0]) * (boxB[3] - boxB[1])
+
+    # IoU = 교차 영역 / (합집합 영역)
+    return interArea / float(boxAArea + boxBArea - interArea)
+
 
 def detect_hardhat(video_path):
     # YOLO 모델
     model = YOLO('best.pt')
-
-    # 클래스 이름 정의
-    #class_names = model.names
-    
-    # 객체 탐지
-    #results = model(img_path)
-
-    #img = cv2.imread(img_path)
-    #detect_hardhat = False
 
     # 비디오 파일 열기
     cap = cv2.VideoCapture(video_path)
