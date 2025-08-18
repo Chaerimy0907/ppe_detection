@@ -67,10 +67,39 @@ def detect_hardhat_multi(video_path):
                 label = model.names[cls_id]     # 클래스 이름
 
                 # 안전모만 필터링
-                if label in ['Hardhat', 'NO-Hardhat'] and conf>0.5 :
-                    #detect_hardhat = True
-                    x1, y1, x2, y2 = map(int, box.xyxy[0])
-                
+                if conf < 0.5:
+                    continue
+
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                box_coords = (x1, y1, x2, y2)
+
+                # 클래스에 따라 분류
+                if label == 'Person':
+                    person_boxes.append(box_coords)
+                elif label == 'Hardhat':
+                    hardhat_boxes.append(box_coords)
+                elif label == 'NO_Hardhat':
+                    no_hardhat_boxes.append(box_coords)
+
+        # 착용자 수 계산
+        wearing_count = 0
+
+        for person_box in person_boxes:
+            wearing = False
+
+            # 각 사람 박스에 대해 안전모 박스와의 IoU 계산
+            for hat_box in hardhat_boxes:
+                iou = calculate_iou(person_box, hat_box)
+                if iou > 0.3:   # 일정 이상 겹치면 '착용'으로 판단
+                    wearing = True
+                    break
+
+            if wearing:
+                wearing_count += 1
+                color = (0, 255, 0)
+            else:
+                color = (0, 0, 255)
+                   
                     # 색상 구분
                     color = (0, 255, 0) if label == 'Hardhat' else (0, 0, 255)
 
