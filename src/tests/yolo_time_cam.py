@@ -20,6 +20,19 @@ def detect_hardhat(video_path):
     if not cap.isOpened():
         print("동영상 읽기 실패")
         return
+    
+    # FPS 값 추출 (프레임 간 시간 계산용)
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    frame_interval = 1 / fps    # 한 프레임당 걸리는 시간
+
+    # 착용 시간 누적 변수
+    wear_time = 0
+
+    # 연속 미착용 프레임 수를 카운트하기 위한 변수
+    no_wear_count = 0
+
+    # 경고 기준 : 5초 동안 미착용
+    no_wear_threshold = int(fps * 3)
 
     # 탐지 결과 반복
     for result in results:
