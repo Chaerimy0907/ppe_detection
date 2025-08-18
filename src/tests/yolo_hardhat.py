@@ -99,34 +99,48 @@ def detect_hardhat_multi(video_path):
                 color = (0, 255, 0)
             else:
                 color = (0, 0, 255)
-                   
-                    # 색상 구분
-                    color = (0, 255, 0) if label == 'Hardhat' else (0, 0, 255)
 
-                    # 컨투어 박스와 라벨 시각화
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-                    cv2.putText(frame, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+            # 사람 박스를 해당 색으로 그리기
+            x1, y1, x2, y2 = person_box
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-                    # 착용 감지시
-                    if label == 'Hardhat':
-                        wearing = True
+        # 통계 계산 및 표시
+        total = len(person_boxes)
+        ratio = (wearing_count / total) * 100 if total > 0 else 0
 
-        # 착용 상태에 따라 시간 및 경고 카운트 갱신
-        if wearing:
-            wear_time += frame_interval # 착용 시간 누적
-            no_wear_count = 0           # 경고 초기화
-        else:
-            no_wear_count += 1
-            # 착용 시간 텍스트 출력
-            time_msg = f'착용 시간 : {wear_time:.1f}초'
-            cv2.putText(frame, "Warning!", (30, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+        # 상단 텍스트 표시
+        cv2.putText(frame, f'Total Person : {total}', (30, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255),2)
+        cv2.putText(frame, f'Wearing Person : {wearing_count}', (30, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+        cv2.putText(frame, f'Percentage : {ratio:.1f}%', (30, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
 
-        # 결과 출력
-        cv2.imshow("Detection Hardhat", frame)
+
+        #             # 색상 구분
+        #             color = (0, 255, 0) if label == 'Hardhat' else (0, 0, 255)
+
+        #             # 컨투어 박스와 라벨 시각화
+        #             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+        #             cv2.putText(frame, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+
+        #             # 착용 감지시
+        #             if label == 'Hardhat':
+        #                 wearing = True
+
+        # # 착용 상태에 따라 시간 및 경고 카운트 갱신
+        # if wearing:
+        #     wear_time += frame_interval # 착용 시간 누적
+        #     no_wear_count = 0           # 경고 초기화
+        # else:
+        #     no_wear_count += 1
+        #     # 착용 시간 텍스트 출력
+        #     time_msg = f'착용 시간 : {wear_time:.1f}초'
+        #     cv2.putText(frame, "Warning!", (30, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
+
+        # # 결과 출력
+        # cv2.imshow("Detection Hardhat", frame)
         
-        # q 누르면 종료
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        # # q 누르면 종료
+        # if cv2.waitKey(1) & 0xFF == ord('q'):
+        #     break
 
     cap.release()
     cv2.destroyAllWindows()
