@@ -4,8 +4,16 @@ yolo_test_img.py를 토대로 기능 추가
 '''
 
 from ultralytics import YOLO
-import time
 import cv2
+
+'''
+작은 박스(inner)가 큰 박스(outer)에 완전히 포함되는지 여부
+예 : 안전모 박스가 사람 박스 안에 있는지 판단
+'''
+def is_inside(inner_box, outer_box):
+    ix1, iy1, ix2, iy2 = inner_box
+    ox1, oy1, ox2, oy2 = outer_box
+    return ix1 >= ox1 and iy1 >= oy1 and ix2 >= ox2 and iy2 >= oy2
 
 def detect_ppe(video_path):
     # YOLO 모델
@@ -18,7 +26,7 @@ def detect_ppe(video_path):
         return
 
     # 클래스 이름 정의
-    ppe_classes = ['Hardhat', 'NO-Hardhat', 'Safety Vest', 'NO-Safety Vest']
+    #ppe_classes = ['Hardhat', 'NO-Hardhat', 'Safety Vest', 'NO-Safety Vest']
     
     while True:
         ret, frame = cap.read()
@@ -27,6 +35,11 @@ def detect_ppe(video_path):
     
         # 객체 탐지
         results = model(frame)
+
+        # 탐지된 박스 저장용 리스트
+        person_boxes = []
+        hardhat_boxes = []
+        vest_boxes = []
 
         # 탐지 결과 반복
         for result in results:
