@@ -24,7 +24,7 @@ def calculate_iou(boxA, boxB):
 # 영상 내 여러 사람의 안전모 착용 여부를 탐지하는 메인 함수
 def detect_hardhat_multi(video_path):
     # YOLO 모델
-    model = YOLO('ppe.pt')
+    model = YOLO('best.pt')
 
     # 비디오 파일 열기
     cap = cv2.VideoCapture(video_path)
@@ -67,7 +67,7 @@ def detect_hardhat_multi(video_path):
                 label = model.names[cls_id]     # 클래스 이름
 
                 # 안전모만 필터링
-                if conf < 0.5:
+                if conf < 0.3:
                     continue
 
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
@@ -90,7 +90,7 @@ def detect_hardhat_multi(video_path):
             # 각 사람 박스에 대해 안전모 박스와의 IoU 계산
             for hat_box in hardhat_boxes:
                 iou = calculate_iou(person_box, hat_box)
-                if iou > 0.3:   # 일정 이상 겹치면 '착용'으로 판단
+                if iou > 0.05:   # 일정 이상 겹치면 '착용'으로 판단
                     wearing = True
                     break
 
@@ -155,4 +155,4 @@ def detect_hardhat_multi(video_path):
 
 # 메인 함수 실행
 if __name__ == "__main__":
-    detect_hardhat_multi('./img/hardhat.mp4')
+    detect_hardhat_multi('./img/hardhat1.mp4')
