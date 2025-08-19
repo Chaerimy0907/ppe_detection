@@ -30,9 +30,6 @@ def detect_ppe(video_path):
         # 객체 탐지
         results = model(frame)
 
-        #img = cv2.imread(video_path)
-        #detect_hardhat = False
-
         # 탐지 결과 반복
         for result in results:
             boxes = result.boxes
