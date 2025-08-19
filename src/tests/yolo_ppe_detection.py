@@ -49,20 +49,20 @@ def detect_ppe(video_path):
                 conf = float(box.conf[0])
                 label = model.names[cls_id]
 
-                # 지정한 PPE 클래스에 속하는 경우만
-                if label in ppe_classes and conf>0.5 :
-                    #detect_hardhat = True
-                    x1, y1, x2, y2 = map(int, box.xyxy[0])
-                
-                    # 클래스별 색상 구분
-                    if label == 'Hardhat':
-                        color = (0, 255, 0)
-                    elif label == 'NO-Hardhat':
-                        color = (0, 0, 255)
-                    elif label == 'Safety Vest':
-                        color = (0, 255, 255)
-                    elif label == 'NO-Safety Vest':
-                        color = (255, 0, 255)
+                if conf < 0.3:
+                    continue    # 낮은 신뢰도 무시
+
+                x1, y1, x2, y2 = map(int, box.xyxy[0])  # 박스 좌표
+
+                # 클래스에 따른 분류
+                if label == 'Person':
+                    person_boxes.append((x1, y1, x2, y2))
+                elif label == 'Hardhat':
+                    hardhat_boxes.append((x1, y1, x2, y2))
+                elif label == 'Safety Vest':
+                    vest_boxes.append((x1, y1, x2, y2))
+
+        perfect_count = 0   # PPE 완벽 착용 인원 수
 
                     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                     cv2.putText(frame, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
