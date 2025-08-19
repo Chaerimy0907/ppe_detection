@@ -76,6 +76,10 @@ def detect_ppe(video_path):
             else:
                 color = (0, 0, 255)
 
+            # 사람 박스 시각화
+            x1, y1, x2, y2 = p_box
+            cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+
                     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                     cv2.putText(frame, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
