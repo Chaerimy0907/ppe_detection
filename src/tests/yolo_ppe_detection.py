@@ -80,6 +80,10 @@ def detect_ppe(video_path):
             x1, y1, x2, y2 = p_box
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
+        # 통계 계산
+        total = len(person_boxes)
+        ratio = (perfect_count / total) * 100 if total > 0 else 0
+
                     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                     cv2.putText(frame, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
