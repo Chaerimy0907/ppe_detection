@@ -84,16 +84,22 @@ def detect_ppe(video_path):
         total = len(person_boxes)
         ratio = (perfect_count / total) * 100 if total > 0 else 0
 
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
-                    cv2.putText(frame, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
+        # 화면에 통계 표시
+        cv2.putText(frame, f'Total: {total}', (30, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+        cv2.putText(frame, f'Perfect: {perfect_count}', (30, 80), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 0), 2)
+        cv2.putText(frame, f'Ratio: {ratio:.1f}%', (30, 120), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 255, 255), 2)
 
-    # 결과 출력
-        cv2.imshow("PPE Detection", frame)
+        if total - perfect_count >= 2:
+            cv2.putText(frame, f'No wearing', (30, 160), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+
+        # 결과 출력
+        cv2.imshow("PPE Monitoring", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
     cap.release()
     cv2.destroyAllWindows()
 
+# 메인 실행 함수
 if __name__ == "__main__":
     detect_ppe('./img/hardhat1.mp4')
