@@ -64,6 +64,18 @@ def detect_ppe(video_path):
 
         perfect_count = 0   # PPE 완벽 착용 인원 수
 
+        # 각 사람에 대해 PPE 착용 여부 확인
+        for p_box in person_boxes:
+            has_hat = any(is_inside(h_box, p_box) for h_box in hardhat_boxes)
+            has_vest = any(is_inside(v_box, p_box) for v_box in vest_boxes)
+
+            if has_hat and has_vest:
+                perfect_count += 1
+                color = (0, 255, 0)
+
+            else:
+                color = (0, 0, 255)
+
                     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                     cv2.putText(frame, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
