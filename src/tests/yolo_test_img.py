@@ -9,7 +9,7 @@ from ultralytics import YOLO
 import time
 import cv2
 
-def detect_hardhat(video_path):
+def detect_ppe(video_path):
     # YOLO 모델
     model = YOLO('best.pt')
 
@@ -20,16 +20,18 @@ def detect_hardhat(video_path):
         return
 
     # 클래스 이름 정의
-    hardhat_classes = ['Hardhat', 'NO-Hardhat']
+    ppe_classes = ['Hardhat', 'NO-Hardhat', 'Safety Vest', 'NO-Safety Vest']
     
     while True:
         ret, frame = cap.read()
+        if not ret:
+            break
     
         # 객체 탐지
         results = model(frame)
 
         #img = cv2.imread(video_path)
-        detect_hardhat = False
+        #detect_hardhat = False
 
         # 탐지 결과 반복
         for result in results:
@@ -39,13 +41,21 @@ def detect_hardhat(video_path):
                 conf = float(box.conf[0])
                 label = model.names[cls_id]
 
-                # 안전모만 필터링
-                if label in ['Hardhat', 'NO-Hardhat'] and conf>0.5 :
-                    detect_hardhat = True
+                # 지정한 PPE 클래스에 속하는 경우만
+                if label in ppe_classes and conf>0.5 :
+                    #detect_hardhat = True
                     x1, y1, x2, y2 = map(int, box.xyxy[0])
                 
-                    # 색상 구분
-                    color = (0, 255, 0) if label == 'Hardhat' else (0, 0, 255)
+                    # 클래스별 색상 구분
+                    if label == 'Hardhat':
+                        color = (0, 255, 0)
+                    elif label == 'NO-Hardhat':
+                        color = (0, 0, 255)
+                    elif label == 'Safety Vest':
+                        color = (0, 255, 255)
+                    elif label == 'NO-Safety Vest':
+                        color = (255, 0, 255)
+
                     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
                     cv2.putText(frame, f'{label} ({conf:.2f})', (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 2)
 
@@ -56,7 +66,7 @@ def detect_hardhat(video_path):
     #     cv2.putText(img, "Hardhat X", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 3)
 
     # 결과 출력
-        cv2.imshow("Detection Hardhat", frame)
+        cv2.imshow("PPE Detection", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
@@ -64,4 +74,4 @@ def detect_hardhat(video_path):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    detect_hardhat('./img/hardhat1.mp4')
+    detect_ppe('./img/hardhat1.mp4')
