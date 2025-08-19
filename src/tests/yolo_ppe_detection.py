@@ -13,8 +13,9 @@ import cv2
 def is_inside(inner_box, outer_box):
     ix1, iy1, ix2, iy2 = inner_box
     ox1, oy1, ox2, oy2 = outer_box
-    return ix1 >= ox1 and iy1 >= oy1 and ix2 >= ox2 and iy2 >= oy2
+    return ix1 >= ox1 and iy1 >= oy1 and ix2 <= ox2 and iy2 <= oy2
 
+# PPE 착용 여부 감지 함수
 def detect_ppe(video_path):
     # YOLO 모델
     model = YOLO('best.pt')
@@ -80,7 +81,7 @@ def detect_ppe(video_path):
             x1, y1, x2, y2 = p_box
             cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-        # 통계 계산
+        # 전체 사람 수 및 착용률 계산
         total = len(person_boxes)
         ratio = (perfect_count / total) * 100 if total > 0 else 0
 
