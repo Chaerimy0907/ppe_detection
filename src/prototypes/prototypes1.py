@@ -37,3 +37,14 @@ def is_inside(inner_box, outer_box):
     ox1, oy1, ox2, oy2 = outer_box  # 바깥 박스 좌표
     return ix1 >= ox1 and iy1 >= oy1 and ix2 <= ox2 and iy2 <= oy2
 
+def draw_text(frame, text, position, color, size=0.8, thickness=2):
+    """화면에 글씨를 출력해주는 함수"""
+    cv2.putText(frame, text, position, Config.TEXT_FONT, size, color, thickness)
+
+def draw_person_box(frame, box, color):
+    """
+    사람을 네모 박스로 표시해주는 함수
+    PPE 착용 여부에 따라 색상이 달라짐
+    """
+    x1, y1, x2, y2 = box
+    cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
