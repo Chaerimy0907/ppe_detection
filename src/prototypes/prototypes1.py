@@ -48,3 +48,27 @@ def draw_person_box(frame, box, color):
     """
     x1, y1, x2, y2 = box
     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+
+
+# 메인 기능 함수
+
+def detect_ppe(video_path):
+    """
+    비디오를 읽고, 사람과 PPE를 감지하고
+    PPE를 제대로 착용했는지 판단하여 결과를 출력하는 함수
+    """
+
+    # 1. 모델 불러오기
+    model = YOLO(Config.MODEL_PATH)
+
+    # 2. 비디오 파일 열기
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print("동영상 읽기 실패")
+        return
+    
+    # 3. 한 프레임씩 반복해서 읽기
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            break
