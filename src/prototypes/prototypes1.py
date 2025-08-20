@@ -130,4 +130,13 @@ def detect_ppe(video_path):
         if total - perfect_count >= 2:
             draw_text(frame, 'No Wearing', Config.TEXT_POS['alert'], Config.LABEL_COLORS['imperfect'], 0.9, 3)
 
-            
+        # 9. 결과 화면 출력
+        cv2.imshow("PPE Monitoring", frame)
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            break
+
+    # 10. 모든 작업이 끝난 후 정리
+    cap.release()
+    cv2.destroyAllWindows()
+
+    
