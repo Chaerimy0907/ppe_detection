@@ -102,3 +102,19 @@ def detect_ppe(video_path):
                     hardhat_boxes.append(bbox)
                 elif label == 'Safety Vest':
                     vest_boxes.append(bbox)
+
+        # 6. 사람마다 PPE 착용 상태 확인하기
+        perfect_count = 0   # 완벽 착용자 수
+
+        for p_box in person_boxes:
+            # 그 사람 박스 안에 안전모와 안전조끼가 있는지 확인
+            has_hat = any(is_inside(h_box, p_box) for h_box in hardhat_boxes)
+            has_vest = any(is_inside(v_box, p_box) for v_box in vest_boxes)
+
+            if has_hat and has_vest:
+                perfect_count += 1
+                draw_person_box(frame, p_box, Config.LABEL_COLORS['perfect'])
+            else:
+                draw_person_box(frame, p_box, Config.LABEL_COLORS['imperfect'])
+            
+        
