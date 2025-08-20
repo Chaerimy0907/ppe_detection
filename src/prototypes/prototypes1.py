@@ -81,4 +81,24 @@ def detect_ppe(video_path):
         hardhat_boxes = []
         vest_boxes = []
 
-        
+        # 5. 결과에서 박스들 하나씩 처리
+        for result in results:
+            for box in result.boxes:
+                cls_id = int(box.cls[0])        # 클래스 ID
+                conf = float(box.conf[0])       # 신뢰도
+                label = model.names[cls_id]     # 클래스 이름
+
+                if conf < Config.CONF_THRESHOLD:
+                    continue    # 신뢰도 낮으면 무시함
+
+                # 좌표 값 가져오기
+                x1, y1, x2, y2 = map(int, box.xyxy[0])
+                bbox = (x1, y1, x2, y2)
+
+                # 어떤 클래스인지에 따라 리스트에 저장
+                if label == 'Person':
+                    person_boxes.append(bbox)
+                elif label == 'Hardhat':
+                    hardhat_boxes.append(bbox)
+                elif label == 'Safety Vest':
+                    vest_boxes.append(bbox)
