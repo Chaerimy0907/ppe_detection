@@ -72,3 +72,13 @@ def detect_ppe(video_path):
         ret, frame = cap.read()
         if not ret:
             break
+
+        # 4. YOLO 모델로 객체 탐지 (사람, 안전모, 안전조끼)
+        results = model(frame)
+
+        # 결과 저장할 리스트
+        person_boxes = []
+        hardhat_boxes = []
+        vest_boxes = []
+
+        
