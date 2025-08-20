@@ -5,7 +5,7 @@ import cv2
 
 # 설정값
 class Config:
-    MODEL_PATH = '../tests/best.pt'  # 사용할 YOLO 모델 파일 이름
+    MODEL_PATH = '../../models/best.pt'  # 사용할 YOLO 모델 파일 이름
     CONF_THRESHOLD = 0.3    # 정확도(신뢰도) 30% 이상만 인식에 사용
     TEXT_FONT = cv2.FONT_HERSHEY_SIMPLEX    # 텍스트 출력할 때 사용할 글씨체
     TEXT_COLOR = (255, 255, 255)            # 흰색 글씨
@@ -143,4 +143,4 @@ def detect_ppe(video_path):
 # 실행 부분
 if __name__ == "__main__":
     # 감지할 비디오 파일 경로 지정
-    detect_ppe('../tests/img/hardhat1.mp4')
+    detect_ppe('../../img/hardhat1.mp4')
