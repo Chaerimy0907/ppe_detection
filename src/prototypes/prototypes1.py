@@ -121,4 +121,13 @@ def detect_ppe(video_path):
         total = len(person_boxes)
         ratio = (perfect_count / total) * 100 if total > 0 else 0
 
-        
+        # 8. 화면에 통계 표시 (총 인원, 완벽 착용자 수, 퍼센트)
+        draw_text(frame, f'Total: {total}', Config.TEXT_POS['total'], Config.TEXT_COLOR)
+        draw_text(frame, f'Perfect: {perfect_count}', Config.TEXT_POS['perfect'], Config.LABEL_COLORS['perfect'])
+        draw_text(frame, f'Ratio: {ratio:.1f}%', Config.TEXT_POS['ratio'], (0, 255, 255))
+
+        # 경고 문구 출력 (2명 이상 미착용 시)
+        if total - perfect_count >= 2:
+            draw_text(frame, 'No Wearing', Config.TEXT_POS['alert'], Config.LABEL_COLORS['imperfect'], 0.9, 3)
+
+            
