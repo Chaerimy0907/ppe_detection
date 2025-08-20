@@ -24,3 +24,16 @@ class Config:
         'ratio': (30, 120),     # 착용 비율(%) 표시 위치
         'alert': (30, 160),     # 경고 메시지 위치
     }
+
+# 유틸리티 함수들
+
+def is_inside(inner_box, outer_box):
+    """
+    작은 박스(inner)가 큰 박스(outer) 안에 완전히 들어가 있는지 확인하는 함수
+    ex) 안전모 박스(inner)가 사람 박스(outer) 안에 들어가 있으면
+    안전모를 착용했다고 판단
+    """
+    ix1, iy1, ix2, iy2 = inner_box  # 안쪽 박스 좌표
+    ox1, oy1, ox2, oy2 = outer_box  # 바깥 박스 좌표
+    return ix1 >= ox1 and iy1 >= oy1 and ix2 <= ox2 and iy2 <= oy2
+
