@@ -117,4 +117,8 @@ def detect_ppe(video_path):
             else:
                 draw_person_box(frame, p_box, Config.LABEL_COLORS['imperfect'])
             
+        # 7. 착용률 계산
+        total = len(person_boxes)
+        ratio = (perfect_count / total) * 100 if total > 0 else 0
+
         
