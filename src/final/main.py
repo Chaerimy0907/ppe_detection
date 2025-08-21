@@ -2,13 +2,11 @@
 성능 최적화 + 1시간마다 통계 CSV 저장 기능
 """
 
-# YOLO 모델을 불러오기 위한 라이브러리
-from ultralytics import YOLO
-# 비디오 처리와 화면 출력 등을 위한 OpenCV 라이브러리
 import cv2
 import csv
 import os
 from datetime import datetime, timedelta
+from ultralytics import YOLO
 
 # 설정값
 class Config:
@@ -35,16 +33,16 @@ class Config:
 
 
 # 유틸 함수
-def box_center(box):
+def get_box_center(bbox):
     """박스 중심 좌표 계산 (x1, y1, x2, y2 -> 중심점)"""
-    x1, y1, x2, y2 = box
+    x1, y1, x2, y2 = bbox
     return (x1 + x2) // 2, (y1 + y2) // 2
 
 def center_inside(ppe_box, person_box):
     """PPE의 중심점이 사람 박스 안에 들어있으면 착용한 걸로 판단
     (기존의 def is_inside(inner_box, outer_box) 보다 더 빠르고 유연한 방식)
     """
-    cx, cy = box_center(ppe_box)
+    cx, cy = get_box_center(ppe_box)
     x1, y1, x2, y2 = person_box
     return x1 <= cx <= x2 and y1 <= cy <= y2
 
@@ -61,19 +59,16 @@ def draw_person_box(frame, box, color):
     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
 # CSV 저장 함수
-def save_csv(csv_path, timestamp, avg_total, ratio):
+def save_csv(path, timestamp, avg_total, ratio):
     row = [timestamp.strftime('%Y-%m-%d %H:%M:%S'), avg_total, round(ratio, 1)]
     header = ['Timestamp', 'Average Total People', 'Average Perfect Ratio (%)']
+    file_exists = os.path.isfile(path)
 
-    if not os.path.isfile(csv_path):
-        with open(csv_path, mode='w', newline='') as f:
-            writer = csv.writer(f)
+    with open(path, mode='a' if file_exists else 'w', newline='') as f:
+        writer = csv.writer(f)
+        if not file_exists:
             writer.writerow(header)
-            writer.writerow(row)
-    else:
-        with open(csv_path, mode='a', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(row)
+        writer.writerow(row)
 
 
 # 메인 기능 함수
@@ -93,8 +88,8 @@ def detect_ppe(video_path):
         return
     
     # 누적 통계 관련 변수 초기화
-    total_count_list = []
-    perfect_count_list = []
+    total_history = []
+    perfect_history = []
     last_saved_time = datetime.now()
     
     # 프레임 반복 처리
@@ -111,9 +106,7 @@ def detect_ppe(video_path):
         result = results[0]
 
         # 감지된 객체별 박스 저장용 리스트
-        person_boxes = []
-        hardhat_boxes = []
-        vest_boxes = []
+        person_boxes, hardhat_boxes, vest_boxes = [], [], []
 
         # 박스 분류
         for result in results:
@@ -151,36 +144,36 @@ def detect_ppe(video_path):
             draw_person_box(frame, p_box, color)
             
         # 착용률 계산
-        total = len(person_boxes)
-        ratio = (perfect_count / total) * 100 if total > 0 else 0
+        total_count = len(person_boxes)
+        ratio = (perfect_count / total_count) * 100 if total_count > 0 else 0
 
         # 영상에 통계 표시 (총 인원, 완벽 착용자 수, 비율)
-        draw_text(frame, f'Total: {total}', Config.TEXT_POS['total'], Config.TEXT_COLOR)
+        draw_text(frame, f'Total: {total_count}', Config.TEXT_POS['total'], Config.TEXT_COLOR)
         draw_text(frame, f'Perfect: {perfect_count}', Config.TEXT_POS['perfect'], Config.LABEL_COLORS['perfect'])
         draw_text(frame, f'Ratio: {ratio:.1f}%', Config.TEXT_POS['ratio'], (0, 255, 255))
 
         # 경고 문구 출력 (2명 이상 미착용 시)
-        if total - perfect_count >= 2:
+        if total_count - perfect_count >= 2:
             draw_text(frame, 'No Wearing', Config.TEXT_POS['alert'], Config.LABEL_COLORS['imperfect'], 0.9, 3)
 
         # 누적 리스트에 추가
-        total_count_list.append(total)
-        perfect_count_list.append(perfect_count)
+        total_history.append(total_count)
+        perfect_history.append(perfect_count)
 
         # 10초마다 통계 저장 (테스트용, 실사용시 hours=1로 변경하여 사용)
         now = datetime.now()
         if now - last_saved_time >= timedelta(seconds=10):
-            if total_count_list:
-                avg_total = round(sum(total_count_list) / len(total_count_list))
-                avg_perfect = round(sum(perfect_count_list) / len(perfect_count_list))
+            if total_history:
+                avg_total = round(sum(total_history) / len(total_history))
+                avg_perfect = round(sum(perfect_history) / len(perfect_history))
                 avg_ratio = (avg_perfect / avg_total) * 100 if avg_total > 0 else 0
 
                 save_csv(Config.CSV_PATH, now, avg_total, avg_ratio)
 
                 # 누적값 초기화
                 last_saved_time = now
-                total_count_list.clear()
-                perfect_count_list.clear()
+                total_history.clear()
+                perfect_history.clear()
 
         # 결과 화면 출력
         cv2.imshow("PPE Monitoring", frame)
@@ -188,10 +181,10 @@ def detect_ppe(video_path):
             break
 
     # 영상 종료 시 마지막 저장
-    if total_count_list:
+    if total_history:
         now = datetime.now()
-        avg_total = round(sum(total_count_list) / len(total_count_list))
-        avg_perfect = round(sum(perfect_count_list) / len(perfect_count_list))
+        avg_total = round(sum(total_history) / len(total_history))
+        avg_perfect = round(sum(perfect_history) / len(perfect_history))
         avg_ratio = (avg_perfect / avg_total) * 100 if avg_total > 0 else 0
         save_csv(Config.CSV_PATH, now, avg_total, avg_ratio)
 
