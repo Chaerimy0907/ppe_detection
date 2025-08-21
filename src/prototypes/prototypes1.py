@@ -2,6 +2,7 @@
 from ultralytics import YOLO
 # 비디오 처리와 화면 출력 등을 위한 OpenCV 라이브러리
 import cv2
+import time
 
 # 설정값
 class Config:
@@ -67,11 +68,23 @@ def detect_ppe(video_path):
         print("동영상 읽기 실패")
         return
     
+    frame_count = 0
+    start_time = time.time()
+
     # 3. 한 프레임씩 반복해서 읽기
     while True:
         ret, frame = cap.read()
         if not ret:
             break
+
+        frame_count += 1
+        now = time.time()
+
+        if now - start_time >= 1.0:
+            fps = frame_count / (now - start_time)
+            print(f"FPS: {fps:.2f}")
+            frame_count = 0
+            start_time = now
 
         # 4. YOLO 모델로 객체 탐지 (사람, 안전모, 안전조끼)
         results = model(frame)
