@@ -10,10 +10,10 @@ import cv2
 # 설정값
 class Config:
     MODEL_PATH = '../../models/best.pt'  # 사용할 YOLO 모델 파일 이름
-    CONF_THRESHOLD = 0.3    # 정확도(신뢰도) 30% 이상만 인식에 사용
+    CONF_THRESHOLD = 0.4    # 정확도(신뢰도) 40% 이상만 인식에 사용
     TEXT_FONT = cv2.FONT_HERSHEY_SIMPLEX    # 텍스트 출력할 때 사용할 글씨체
     TEXT_COLOR = (255, 255, 255)            # 흰색 글씨
-    FRAME_DELAY = 1                         # 프레임 간 간격
+    FRAME_DELAY = 5                         # 프레임 간 간격
 
     # 상자 색상 설정(각 사람마다 제대로 착용했는지에 따라 색 다르게)
     LABEL_COLORS = {
@@ -31,15 +31,15 @@ class Config:
 
 # 유틸리티 함수들
 
-def is_inside(inner_box, outer_box):
-    """
-    작은 박스(inner)가 큰 박스(outer) 안에 완전히 들어가 있는지 확인하는 함수
-    ex) 안전모 박스(inner)가 사람 박스(outer) 안에 들어가 있으면
-    안전모를 착용했다고 판단
-    """
-    ix1, iy1, ix2, iy2 = inner_box  # 안쪽 박스 좌표
-    ox1, oy1, ox2, oy2 = outer_box  # 바깥 박스 좌표
-    return ix1 >= ox1 and iy1 >= oy1 and ix2 <= ox2 and iy2 <= oy2
+# def is_inside(inner_box, outer_box):
+#     """
+#     작은 박스(inner)가 큰 박스(outer) 안에 완전히 들어가 있는지 확인하는 함수
+#     ex) 안전모 박스(inner)가 사람 박스(outer) 안에 들어가 있으면
+#     안전모를 착용했다고 판단
+#     """
+#     ix1, iy1, ix2, iy2 = inner_box  # 안쪽 박스 좌표
+#     ox1, oy1, ox2, oy2 = outer_box  # 바깥 박스 좌표
+#     return ix1 >= ox1 and iy1 >= oy1 and ix2 <= ox2 and iy2 <= oy2
 
 def draw_text(frame, text, position, color, size=0.8, thickness=2):
     """화면에 글씨를 출력해주는 함수"""
