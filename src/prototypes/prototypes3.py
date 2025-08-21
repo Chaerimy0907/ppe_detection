@@ -85,11 +85,10 @@ def detect_ppe(video_path):
         print("동영상 읽기 실패")
         return
     
-    # 누적 통계 초기화
+    # 누적 통계 관련 변수 초기화
     last_saved_time = datetime.now()
     total_count_acc = 0
     perfect_count_acc = 0
-    frame_count_acc = 0
     
     # 프레임 반복 처리
     while True:
@@ -157,10 +156,16 @@ def detect_ppe(video_path):
         if total - perfect_count >= 2:
             draw_text(frame, 'No Wearing', Config.TEXT_POS['alert'], Config.LABEL_COLORS['imperfect'], 0.9, 3)
 
-        # 누적 통계 업데이트
-        total_count_acc += total
-        perfect_count_acc += perfect_count
-        frame_count_acc += 1
+        # 1시간마다 CSV에 통계 저장
+        now = datetime.now()
+        if now - last_saved_time >= timedelta(hours=1):
+            ratio_acc = (perfect_count_acc / total_count_acc * 100) if total_count_acc > 0 else 0
+            with open(Config.CVS_PATH, 'a', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow([
+                    now.strftime('%Y-%m-%d %H:%M:%S'),
+                    total_count_acc, perfect_count_acc, round(ratio_acc, 1)
+                ])
 
 
         # 결과 화면 출력
