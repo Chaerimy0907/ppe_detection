@@ -162,6 +162,10 @@ def detect_ppe(video_path):
         if total - perfect_count >= 2:
             draw_text(frame, 'No Wearing', Config.TEXT_POS['alert'], Config.LABEL_COLORS['imperfect'], 0.9, 3)
 
+        # 누적값 업데이트
+        total_count_acc += total
+        perfect_count_acc += perfect_count
+        
         # 1시간마다 CSV에 통계 저장
         now = datetime.now()
         if now - last_saved_time >= timedelta(hours=1):
