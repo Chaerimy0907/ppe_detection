@@ -7,6 +7,7 @@ from ultralytics import YOLO
 # 비디오 처리와 화면 출력 등을 위한 OpenCV 라이브러리
 import cv2
 import csv
+import os
 from datetime import datetime, timedelta
 
 # 설정값
@@ -59,6 +60,13 @@ def draw_person_box(frame, box, color):
     """
     x1, y1, x2, y2 = box
     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
+
+def initialize_csv():
+    """CSV 초기화 함수 (헤더 작성)"""
+    if not os.path.exists(Config.CVS_PATH):
+        with open(Config.CVS_PATH, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(['timestamp', 'total_detected', 'perfect_wearing', 'wearing_ratio'])
 
 
 # 메인 기능 함수
