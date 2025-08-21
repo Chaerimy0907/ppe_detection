@@ -17,7 +17,7 @@ class Config:
     TEXT_FONT = cv2.FONT_HERSHEY_SIMPLEX    # 텍스트 출력할 때 사용할 글씨체
     TEXT_COLOR = (255, 255, 255)            # 흰색 글씨
     FRAME_DELAY = 5                         # 프레임 간 간격
-    CVS_PATH = './ppe_log.csv'                # 저장될 csv 파일 경로
+    CSV_PATH = './ppe_log.csv'                # 저장될 csv 파일 경로
 
     # 박스 색상 설정 : PPE 착용 여부에 따라 다르게 설정
     LABEL_COLORS = {
@@ -62,12 +62,13 @@ def draw_person_box(frame, box, color):
 
 # CSV 저장 함수
 def save_csv(csv_path, timestamp, total_count, perfect_count):
-    row = [timestamp.strftime('%Y-%m-%d %H:%M:%S'), total_count, perfect_count]
+    ratio = (perfect_count / total_count) * 100 if total_count > 0 else 0
+    row = [timestamp.strftime('%Y-%m-%d %H:%M:%S'), total_count, round(ratio, 1)]
 
     if not os.path.isfile(csv_path):
         with open(csv_path, mode='w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['Timestamp', 'Total Count', 'Perfect Count'])
+            writer.writerow(['Timestamp', 'Total Count', 'Perfect Ratio(%)'])
             writer.writerow(row)
     else:
         with open(csv_path, mode='a', newline='') as f:
@@ -165,17 +166,11 @@ def detect_ppe(video_path):
         # 누적값 업데이트
         total_count_acc += total
         perfect_count_acc += perfect_count
-        
-        # 1시간마다 CSV에 통계 저장
+
+        # 10초마다 통계 저장 (테스트용, 실사용시 hours=1로 변경하여 사용)
         now = datetime.now()
-        if now - last_saved_time >= timedelta(hours=1):
-            ratio_acc = (perfect_count_acc / total_count_acc * 100) if total_count_acc > 0 else 0
-            with open(Config.CVS_PATH, 'a', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow([
-                    now.strftime('%Y-%m-%d %H:%M:%S'),
-                    total_count_acc, perfect_count_acc, round(ratio_acc, 1)
-                ])
+        if now - last_saved_time >= timedelta(seconds=10):
+            save_csv(Config.CSV_PATH, now, total_count_acc, perfect_count_acc)
 
             # 누적값 초기화
             last_saved_time = now
@@ -187,17 +182,10 @@ def detect_ppe(video_path):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # 마지막 누적 통계 저장 (영상이 1시간 안에 끝난 경우 대비)
+    # 영상 종료 시 마지막 저장
     if total_count_acc > 0:
-        ratio_acc = (perfect_count_acc / total_count_acc * 100)
-        with open(Config.CSV_PATH, 'a', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow([
-                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                total_count_acc,
-                perfect_count_acc,
-                round(ratio_acc, 1)
-            ])
+        now = datetime.now()
+        save_csv(Config.CSV_PATH, now, total_count_acc, perfect_count_acc)
 
     # 종료
     cap.release()
