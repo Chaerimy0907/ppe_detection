@@ -61,14 +61,14 @@ def draw_person_box(frame, box, color):
     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
 # CSV 저장 함수
-def save_csv(csv_path, timestamp, total_count, perfect_count):
-    ratio = (perfect_count / total_count) * 100 if total_count > 0 else 0
-    row = [timestamp.strftime('%Y-%m-%d %H:%M:%S'), total_count, round(ratio, 1)]
+def save_csv(csv_path, timestamp, avg_total, ratio):
+    row = [timestamp.strftime('%Y-%m-%d %H:%M:%S'), avg_total, round(ratio, 1)]
+    header = ['Timestamp', 'Average Total People', 'Average Perfect Ratio (%)']
 
     if not os.path.isfile(csv_path):
         with open(csv_path, mode='w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['Timestamp', 'Total Count', 'Perfect Ratio(%)'])
+            writer.writerow(header)
             writer.writerow(row)
     else:
         with open(csv_path, mode='a', newline='') as f:
@@ -93,9 +93,9 @@ def detect_ppe(video_path):
         return
     
     # 누적 통계 관련 변수 초기화
+    total_count_list = []
+    perfect_count_list = []
     last_saved_time = datetime.now()
-    total_count_acc = 0
-    perfect_count_acc = 0
     
     # 프레임 반복 처리
     while True:
@@ -163,19 +163,24 @@ def detect_ppe(video_path):
         if total - perfect_count >= 2:
             draw_text(frame, 'No Wearing', Config.TEXT_POS['alert'], Config.LABEL_COLORS['imperfect'], 0.9, 3)
 
-        # 누적값 업데이트
-        total_count_acc += total
-        perfect_count_acc += perfect_count
+        # 누적 리스트에 추가
+        total_count_list.append(total)
+        perfect_count_list.append(perfect_count)
 
         # 10초마다 통계 저장 (테스트용, 실사용시 hours=1로 변경하여 사용)
         now = datetime.now()
         if now - last_saved_time >= timedelta(seconds=10):
-            save_csv(Config.CSV_PATH, now, total_count_acc, perfect_count_acc)
+            if total_count_list:
+                avg_total = round(sum(total_count_list) / len(total_count_list))
+                avg_perfect = round(sum(perfect_count_list) / len(perfect_count_list))
+                avg_ratio = (avg_perfect / avg_total) * 100 if avg_total > 0 else 0
 
-            # 누적값 초기화
-            last_saved_time = now
-            total_count_acc = 0
-            perfect_count_acc = 0
+                save_csv(Config.CSV_PATH, now, avg_total, avg_ratio)
+
+                # 누적값 초기화
+                last_saved_time = now
+                total_count_list.clear()
+                perfect_count_list.clear()
 
         # 결과 화면 출력
         cv2.imshow("PPE Monitoring", frame)
@@ -183,9 +188,12 @@ def detect_ppe(video_path):
             break
 
     # 영상 종료 시 마지막 저장
-    if total_count_acc > 0:
+    if total_count_list:
         now = datetime.now()
-        save_csv(Config.CSV_PATH, now, total_count_acc, perfect_count_acc)
+        avg_total = round(sum(total_count_list) / len(total_count_list))
+        avg_perfect = round(sum(perfect_count_list) / len(perfect_count_list))
+        avg_ratio = (avg_perfect / avg_total) * 100 if avg_total > 0 else 0
+        save_csv(Config.CSV_PATH, now, avg_total, avg_ratio)
 
     # 종료
     cap.release()
