@@ -167,6 +167,10 @@ def detect_ppe(video_path):
                     total_count_acc, perfect_count_acc, round(ratio_acc, 1)
                 ])
 
+            # 누적값 초기화
+            last_saved_time = now
+            total_count_acc = 0
+            perfect_count_acc = 0
 
         # 결과 화면 출력
         cv2.imshow("PPE Monitoring", frame)
