@@ -17,6 +17,7 @@ class Config:
     TEXT_FONT = cv2.FONT_HERSHEY_SIMPLEX    # 텍스트 출력할 때 사용할 글씨체
     TEXT_COLOR = (255, 255, 255)            # 흰색 글씨
     FRAME_DELAY = 5                         # 프레임 간 간격
+    CVS_PATH = './ppe_log.csv'                # 저장될 csv 파일 경로
 
     # 박스 색상 설정 : PPE 착용 여부에 따라 다르게 설정
     LABEL_COLORS = {
@@ -32,8 +33,6 @@ class Config:
         'alert': (30, 160),     # 경고 문구
     }
 
-    # CSV 파일 이름
-    CVS_PATH = 'ppe_log.csv'
 
 # 유틸 함수
 def box_center(box):
@@ -61,12 +60,19 @@ def draw_person_box(frame, box, color):
     x1, y1, x2, y2 = box
     cv2.rectangle(frame, (x1, y1), (x2, y2), color, 2)
 
-def initialize_csv():
-    """CSV 초기화 함수 (헤더 작성)"""
-    if not os.path.exists(Config.CVS_PATH):
-        with open(Config.CVS_PATH, 'w', newline='') as f:
+# CSV 저장 함수
+def save_csv(csv_path, timestamp, total_count, perfect_count):
+    row = [timestamp.strftime('%Y-%m-%d %H:%M:%S'), total_count, perfect_count]
+
+    if not os.path.isfile(csv_path):
+        with open(csv_path, mode='w', newline='') as f:
             writer = csv.writer(f)
-            writer.writerow(['timestamp', 'total_detected', 'perfect_wearing', 'wearing_ratio'])
+            writer.writerow(['Timestamp', 'Total Count', 'Perfect Count'])
+            writer.writerow(row)
+    else:
+        with open(csv_path, mode='a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(row)
 
 
 # 메인 기능 함수
@@ -176,6 +182,18 @@ def detect_ppe(video_path):
         cv2.imshow("PPE Monitoring", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
+
+    # 마지막 누적 통계 저장 (영상이 1시간 안에 끝난 경우 대비)
+    if total_count_acc > 0:
+        ratio_acc = (perfect_count_acc / total_count_acc * 100)
+        with open(Config.CSV_PATH, 'a', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow([
+                datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                total_count_acc,
+                perfect_count_acc,
+                round(ratio_acc, 1)
+            ])
 
     # 종료
     cap.release()
