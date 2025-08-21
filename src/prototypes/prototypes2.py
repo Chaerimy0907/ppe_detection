@@ -77,6 +77,7 @@ def detect_ppe(video_path):
 
     # 1. 모델 불러오기
     model = YOLO(Config.MODEL_PATH)
+    names = model.names # 클래스 이름 캐싱
 
     # 2. 비디오 파일 열기
     cap = cv2.VideoCapture(video_path)
@@ -84,21 +85,25 @@ def detect_ppe(video_path):
         print("동영상 읽기 실패")
         return
     
-    # 3. 한 프레임씩 반복해서 읽기
+    # 3. 프레임 반복 처리
     while True:
         ret, frame = cap.read()
         if not ret:
             break
 
+        # 프레임 리사이즈 (성능 개선)
+        frame = cv2.resize(frame, (640, 360))
+
         # 4. YOLO 모델로 객체 탐지 (사람, 안전모, 안전조끼)
-        results = model(frame)
+        results = model(frame, verbose=False)
+        result = results[0]
 
         # 결과 저장할 리스트
         person_boxes = []
         hardhat_boxes = []
         vest_boxes = []
 
-        # 5. 결과에서 박스들 하나씩 처리
+        # 5. 결과에서 박스 정리
         for result in results:
             for box in result.boxes:
                 cls_id = int(box.cls[0])        # 클래스 ID
@@ -125,14 +130,13 @@ def detect_ppe(video_path):
 
         for p_box in person_boxes:
             # 그 사람 박스 안에 안전모와 안전조끼가 있는지 확인
-            has_hat = any(is_inside(h_box, p_box) for h_box in hardhat_boxes)
-            has_vest = any(is_inside(v_box, p_box) for v_box in vest_boxes)
+            has_hat = any(center_inside(h_box, p_box) for h_box in hardhat_boxes)
+            has_vest = any(center_inside(v_box, p_box) for v_box in vest_boxes)
 
+            color = Config.LABEL_COLORS['perfect'] if has_hat and has_vest else Config.LABEL_COLORS['imperfect']
             if has_hat and has_vest:
                 perfect_count += 1
-                draw_person_box(frame, p_box, Config.LABEL_COLORS['perfect'])
-            else:
-                draw_person_box(frame, p_box, Config.LABEL_COLORS['imperfect'])
+            draw_person_box(frame, p_box, color)
             
         # 7. 착용률 계산
         total = len(person_boxes)
@@ -152,7 +156,7 @@ def detect_ppe(video_path):
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # 10. 모든 작업이 끝난 후 정리
+    # 10. 종료
     cap.release()
     cv2.destroyAllWindows()
 
