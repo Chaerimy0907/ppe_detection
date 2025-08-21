@@ -6,6 +6,8 @@
 from ultralytics import YOLO
 # 비디오 처리와 화면 출력 등을 위한 OpenCV 라이브러리
 import cv2
+import csv
+from datetime import datetime, timedelta
 
 # 설정값
 class Config:
@@ -84,6 +86,12 @@ def detect_ppe(video_path):
     if not cap.isOpened():
         print("동영상 읽기 실패")
         return
+    
+    # 2-1. 누적 통계 초기화
+    last_saved_time = datetime.now()
+    total_count_acc = 0
+    perfect_count_acc = 0
+    frame_count_acc = 0
     
     # 3. 프레임 반복 처리
     while True:
