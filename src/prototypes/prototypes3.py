@@ -1,5 +1,5 @@
 """
-1시간 마다 통계 CSV 저장 기능
+성능 최적화 + 1시간마다 통계 CSV 저장 기능
 """
 
 # YOLO 모델을 불러오기 위한 라이브러리
@@ -11,24 +11,24 @@ from datetime import datetime, timedelta
 
 # 설정값
 class Config:
-    MODEL_PATH = '../../models/best.pt'  # 사용할 YOLO 모델 파일 이름
-    CONF_THRESHOLD = 0.4    # 정확도(신뢰도) 40% 이상만 인식에 사용
+    MODEL_PATH = '../../models/best.pt'     # 사용할 YOLO 모델 파일 이름
+    CONF_THRESHOLD = 0.4                    # 정확도(신뢰도) 40% 이상만 인식에 사용
     TEXT_FONT = cv2.FONT_HERSHEY_SIMPLEX    # 텍스트 출력할 때 사용할 글씨체
     TEXT_COLOR = (255, 255, 255)            # 흰색 글씨
     FRAME_DELAY = 5                         # 프레임 간 간격
 
-    # 상자 색상 설정(각 사람마다 제대로 착용했는지에 따라 색 다르게)
+    # 박스 색상 설정 : PPE 착용 여부에 따라 다르게 설정
     LABEL_COLORS = {
-        'perfect': (0, 255, 0),     # 초록 : 완벽 착용
-        'imperfect': (0, 0, 255),    # 빨강 : 미착용
+        'perfect': (0, 255, 0),     # 초록 : PPE 완벽 착용
+        'imperfect': (0, 0, 255),    # 빨강 : PPE 미착용
     }
 
-    # 글자 위치 (영상에서 글자가 어디에 나올지 좌표 설정)
+    # 텍스트 위치 (영상 좌상단 기준)
     TEXT_POS = {
-        'total': (30, 40),      # 총 인원 수 표시 위치
-        'perfect': (30, 80),    # PPE 완벽 착용 인원 수 표시 위치
-        'ratio': (30, 120),     # 착용 비율(%) 표시 위치
-        'alert': (30, 160),     # 경고 메시지 위치
+        'total': (30, 40),      # 총 인원 수
+        'perfect': (30, 80),    # PPE 완벽 착용 인원 수
+        'ratio': (30, 120),     # 착용 비율(%)
+        'alert': (30, 160),     # 경고 문구
     }
 
 # 유틸리티 함수들
@@ -70,30 +70,28 @@ def draw_person_box(frame, box, color):
 
 
 # 메인 기능 함수
-
 def detect_ppe(video_path):
     """
     비디오를 읽고, 사람과 PPE를 감지하고
     PPE를 제대로 착용했는지 판단하여 결과를 출력하는 함수
     """
-
-    # 1. 모델 불러오기
+    # 모델 불러오기
     model = YOLO(Config.MODEL_PATH)
     names = model.names # 클래스 이름 캐싱
 
-    # 2. 비디오 파일 열기
+    # 비디오 파일 열기
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         print("동영상 읽기 실패")
         return
     
-    # 2-1. 누적 통계 초기화
+    # 누적 통계 초기화
     last_saved_time = datetime.now()
     total_count_acc = 0
     perfect_count_acc = 0
     frame_count_acc = 0
     
-    # 3. 프레임 반복 처리
+    # 프레임 반복 처리
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -102,16 +100,16 @@ def detect_ppe(video_path):
         # 프레임 리사이즈 (성능 개선)
         frame = cv2.resize(frame, (640, 360))
 
-        # 4. YOLO 모델로 객체 탐지 (사람, 안전모, 안전조끼)
+        # YOLO 감지 수행 (verbose=False로 로그 억제)
         results = model(frame, verbose=False)
         result = results[0]
 
-        # 결과 저장할 리스트
+        # 감지된 객체별 박스 저장용 리스트
         person_boxes = []
         hardhat_boxes = []
         vest_boxes = []
 
-        # 5. 결과에서 박스 정리
+        # 박스 분류
         for result in results:
             for box in result.boxes:
                 cls_id = int(box.cls[0])        # 클래스 ID
@@ -133,7 +131,7 @@ def detect_ppe(video_path):
                 elif label == 'Safety Vest':
                     vest_boxes.append(bbox)
 
-        # 6. 사람마다 PPE 착용 상태 확인하기
+        # PPE 착용 판단
         perfect_count = 0   # 완벽 착용자 수
 
         for p_box in person_boxes:
@@ -146,11 +144,11 @@ def detect_ppe(video_path):
                 perfect_count += 1
             draw_person_box(frame, p_box, color)
             
-        # 7. 착용률 계산
+        # 착용률 계산
         total = len(person_boxes)
         ratio = (perfect_count / total) * 100 if total > 0 else 0
 
-        # 8. 화면에 통계 표시 (총 인원, 완벽 착용자 수, 퍼센트)
+        # 영상에 통계 표시 (총 인원, 완벽 착용자 수, 비율)
         draw_text(frame, f'Total: {total}', Config.TEXT_POS['total'], Config.TEXT_COLOR)
         draw_text(frame, f'Perfect: {perfect_count}', Config.TEXT_POS['perfect'], Config.LABEL_COLORS['perfect'])
         draw_text(frame, f'Ratio: {ratio:.1f}%', Config.TEXT_POS['ratio'], (0, 255, 255))
@@ -165,12 +163,12 @@ def detect_ppe(video_path):
         frame_count_acc += 1
 
 
-        # 9. 결과 화면 출력
+        # 결과 화면 출력
         cv2.imshow("PPE Monitoring", frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
-    # 10. 종료
+    # 종료
     cap.release()
     cv2.destroyAllWindows()
 
