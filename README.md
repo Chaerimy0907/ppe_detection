@@ -1,39 +1,47 @@
 # PPE DETECTION CCTV
 
-PPE(Personal Protective Equipment, 개인 보호 장비) 착용 여부를 YOLOv8 기반으로 감지하고, 실시간 모니터링 및 착용 통계를 시각화하는 시스템   
-현장에서의 안전사고 예방을 목적으로 함
+PPE(Personal Protective Equipment, 개인 보호 장비) 착용 여부를 YOLOv8 기반으로 감지하는 실시간 CCTV 모니터링 시스템   
+작업자의 안전모 및 안전조끼 착용을 자동 감지하고, 실시간 통계 출력 및 착용 비율을 CSV 파일로 기록하여 산업 현장의 안전사고 예방에 기여
 
 ---
 
 ## 프로젝트 목표
 
-- 작업자의 **안전모(Hardhat)**, **안전조끼(Safety Vest)** 착용 여부 감지
-- 전체 인원 대비 PPE 완벽 착용자 수와 비율을 실시간 출력
-- 미착용 인원이 일정 수 이상일 경우 경고 문구 출력
+- **YOLOv8 기반 객체 감지 모델을 이용한 PPE 착용 여부 실시간 감지**
+- 감지된 인원 중 **PPE를 완벽히 착용한 인원 수 및 착용 비율 출력**
+- 미착용 인원이 일정 수 이상일 경우 **경고 메시지 출력**
+- 일정 주기마다 **착용률 통계 및 평균 인원 수를 CSV로 저장**
 
 ---
 
-## 진행사항
-<details>
-<summary>피드백</summary>
+## 주요 기능
 
-- [0814 - 피드백 진행](/feedback/0814.md)
-- [0818 - 피드백 진행](/feedback/0818.md)
-- [0819 - 피드백 진행](/feedback/0819.md)
-- [0820 - 피드백 진행](/feedback.0820.md)
-
-</details>
-
-<details>
-<summary>코드 진행 사항</summary>
-
-- [0820 - Prototype 코드 작성](src/prototypes/prototypes1.py)
-
-</details>
+- 객체 감지 클래스 : `Person`, `Hardhat`, `Safety Vest`
+- 각 사람 박스 내부에 안전모와 안전 조끼가 있는지 확인하여 **PPE 완전 착용 여부 판단**
+- 실시간 영상에 통계 수치와 색상 시각화 출력:
+  - **초록 박스** : 안전모 + 안전조끼 착용 (완전 착용자)
+  - **빨간 박스** : 미착용 또는 일부 미착용
+- **경고 기능** : 미착용자 2명 이상일 경우 경고 문구 출력
+- **10초마다 CSV 저장** (실제 사용 시 1시간 단위로 조정 가능) :
+  - 평균 인원 수
+  - 평균 착용률(%)
+  > 예시 : `ppe_log.csv` → `2025-08-21 14:00:00, 9, 87.5`
 
 ---
 
-## 하드웨어 / 설치 및 실행
+## 설정값 (`Config` 클래스)
+
+| 항목 | 설명 | 기본값 |
+|------|----------|-------|
+| `MODEL_PATH` | 학습된 YOLOv8 모델 경로 | `'../../models/best.pt'` |
+| `CSV_PATH` | 착용률 저장용 CSV 경로 | `'./ppe_log.csv'` |
+| `CONF_THRESHOLD` | 감지 신뢰도 임계값 | `0.4` |
+| `FRAME_DELAY` | 프레임 간 대기 시간 (ms) | `5` |
+| `LABEL_COLOR` | 착용/미착용 색상 설정 | 초록 / 빨강 |
+
+---
+
+## 하드웨어 / 설치 및 실행 방법
 
 ### 1. 하드웨어
 - 웹캠 (웹캠으로 테스트를 진행할 수 없는 환경이라 mp4 파일로 테스트 진행)
@@ -45,41 +53,7 @@ PPE(Personal Protective Equipment, 개인 보호 장비) 착용 여부를 YOLOv8
 pip install ultralytics opencv-python
 ```
 
-### 3. 실행 (prototype)
-```bash
-python prototypes1.py
-```
-
-> `prototypes1.py`에서 사용할 비디오 경로와 모델 경로를 `../../models/best.pt`, `../../img/hardhat1.mp4`
-
----
-
-## 주요 기능 설명
-
-- YOLO 모델을 통한 객체 탐지
-- 객체 클래스 : `Person`, `Hardhat`, `Safety Vest`
-- 각 사람 박스 내부에 안전모와 안전조끼가 있는지 확인하여 PPE 착용 여부 판단
-- 실시간 영상에 통계 수치와 색상 시각화 표시
-  - 초록 박스 : 안전모 + 안전조끼 착용자
-  - 빨간 박스 : 미착용자
-- 미착용자가 2명 이상일 경우 화면 하단에 경고 출력
-
----
-
-## 설정값 (`Config` 클래스)
-
-| 항목 | 설명 | 기본값 |
-|------|----------|-------|
-| `MODEL_PATH` | 학습된 YOLOv8 모델 경로 | `best.pt` |
-| `CONF_THRESHOLD` | 신뢰도 임계값 | 0.3 |
-| `FRAME_DELAY` | 프레임 간 대기 시간 (ms) | 1 |
-| `TEXT_FONT` | 텍스트 폰트 | `cv2.FONT_HERSHEY_SIMPLEX` |
-| `TEXT_COLOR` | 기본 텍스트 색 | 흰색 |
-| `LABEL_COLOR` | 착용/미착용 색상 설정 | 초록/빨강 |
-
----
-
-## 폴더 구조
+### 3. 파일 구성
 
 ```
 ppe_detection/
@@ -87,39 +61,83 @@ ppe_detection/
 ├── docs
 ├── feedback
 ├── img
-│   └── hardhat1.mp4     # 테스트 영상
+│   └── hardhat1.mp4         # 테스트 영상
 ├── models
 │   └── best.pt              # 학습된 YOLOv8 모델
 ├── src
 │   └── final
+│       └── main.py          # 실행 파일
+│       └── ppe_log.csv      # 착용률 기록 파일 (자동 생성)
 │   └── prototypes
-│       └── prototypes1.py 
 │   └── tests 
 ```
 
----
+### 4. 실행
 
-## 사용법 가이드
+```bash
+python scr/final/main.py
+```
 
-1. `best.pt`라는 이름의 YOLOv8 모델이 필요함. [github에 공개된 모델](https://github.com/snehilsanyal/Construction-Site-Safety-PPE-Detection/tree/main/models)
-2. `img/` 폴더에 테스트용 영상 저장
-3. `prototypes1.py`를 실행하면 영상이 열리고 감지된 인원이 화면에 박스로 표시됨
-4. 사람마다 초록/빨간 박스로 표시되며, 상단에는 총 인원, 착용 인원, 착용 비율이 출력됨
-5. 'q' 키를 누르면 프로그램이 종료됨
+> `prototypes1.py` 내부에 `VIDEO_PATH`, `MODEL_PATH`가 하드코딩 되어 있으므로 필요시 수정
 
 ---
 
-## 참고사항
+## 저장되는 CSV 형식
 
-- `is_inside()` 함수는 객체 박스가 사람 박스 내부에 **완전히** 포함되는지 판단함
-- `Config` 클래스를 통해 모든 하드코딩값을 한 곳에서 조정 가능하게 작성함
-- 전처리나 후처리 단계 추가, 저장 기능 확장도 쉽게 구현 가능함
+| Timestamp           | Average Total People | Average Perfect Ratio (%) |
+| ------------------- | -------------------- | ------------------------- |
+| 2025-08-21 14:00:00 | 8                    | 87.5                      |
+
+- **주기** : 기본 10초 (테스트 용도) 실사용 시 1시간으로 조정 가능
+- **비율 기준** : 완전 착용자 수 / 전체 인원 x 100
+- **판단 기준** : PPE 두 가지(Hardhat + Safety Vest)가 모두 있어야 착용으로 인정됨
+
+---
+
+## 테스트 방법
+
+1. `models/best.pt` → [사전 학습된 모델](https://github.com/snehilsanyal/Construction-Site-Safety-PPE-Detection/tree/main/models) 다운로드
+2. `img/hardhat1.mp4` → 테스트용 영상 준비
+3. `python src/fianl/main.py` 실행
+4. 영상 재생 화면에서 사람마다 색상 박스와 통계 수치 확인
+5. 'q' 키를 누르면 종료되며, 통계는 자동 저장됨
+
+---
+
+## 진행상황
+<details>
+<summary>피드백 로그</summary>
+
+- [0814 - 피드백 진행](/feedback/0814.md)
+- [0818 - 피드백 진행](/feedback/0818.md)
+- [0819 - 피드백 진행](/feedback/0819.md)
+- [0820 - 피드백 진행](/feedback.0820.md)
+
+</details>
+
+<details>
+<summary>코드 진행 상황</summary>
+
+- [0820 - Prototype 코드 작성](src/prototypes/prototypes1.py)
+- [0820 - 성능 최적화 코드 작성](src/prototypes/prototypes2.py)
+- [0821 - CSV 통계 저장 기능 추가 및 코드 정리](src/prototypes/prototypes3.py)
+- [0821 - 코드 최적화 후 main.py 작성](src/final/main.py)
+
+</details>
 
 ---
 
 ## 향후 개선 아이디어
 
-- 미착용자 별 **미착용 지속 시간 기록**
-- 일정 시간 이상 미착용 시 **csv에 자동 저장**
-    > 인식 오류 이슈로 착용했음에도 감지가 안 되는 시간까지 카운트되어 정확하지 않음.
-- 야간 및 악천후 대응을 위한 모델 재학습
+- 미착용자에 대한 **지속 시간 추적 및 기록**
+- 미착용 상태가 일정 시간 이상 지속될 경우 **알람 또는 자동 저장**
+- **야간 또는 어두운 환경**에서도 잘 작동하도록 모델 재학습
+- **모듈화 및 웹 대시보드 연동** (Flask, Streamlit 등)
+
+---
+
+## 참고 사항
+
+- YOLO의 감지 신뢰도(confidence) 임계값은 낮추면 더 많이 감지되지만 오류도 증가함
+- 단순 중심점 기준 착용 여부 판단이기 때문에 **겹쳐 보이는 객체는 오탐지 발생 가능**
+- 감지된 총 인원은 고유 추적이 아닌 "프레임 내 감지 기준"임
