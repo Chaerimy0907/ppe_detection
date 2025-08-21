@@ -14,6 +14,13 @@ PPE(Personal Protective Equipment, 개인 보호 장비) 착용 여부를 YOLOv8
 
 ---
 
+## 참고 모델
+
+- 사용된 YOLOv8 모델은 다음 GitHub에서 확인 및 다운로드 가능 :
+  [github.com/snehilsanyal/Construction-Site-Safety-PPE-Detection](https://github.com/snehilsanyal/Construction-Site-Safety-PPE-Detection/tree/main/models)
+
+---
+
 ## 하드웨어 및 설치
 
 ### 1. 하드웨어 요구 사항
@@ -21,6 +28,7 @@ PPE(Personal Protective Equipment, 개인 보호 장비) 착용 여부를 YOLOv8
 - 데스크탑 또는 노트북
 
 ### 2. 패키지 설치
+
 ```bash
 pip install ultralytics opencv-python
 ```
@@ -36,6 +44,45 @@ python scr/final/main.py
 > `prototypes1.py` 파일 내의 비디오 경로 및 모델 경로
 > - 모델 경로 : `../../models/best.pt`
 > - 비디오 경로 : `../../img/hardhat1.mp4`
+
+---
+
+## 폴더 구조
+
+```
+ppe_detection/
+├── assets
+├── docs
+├── feedback
+├── img
+│   └── hardhat1.mp4         # 테스트 영상
+├── models
+│   └── best.pt              # 학습된 YOLOv8 모델
+├── src
+│   └── final
+│       └── main.py          # 실행 파일
+│       └── ppe_log.csv      # 착용률 기록 파일 (자동 생성)
+│   └── prototypes
+│   └── tests 
+```
+
+---
+
+## 테스트 및 결과 확인
+
+- 결과 화면에서는 실시간 감지된 사람 수 및 PPE 착용 여부가 시각적으로 표현됨
+- `ppe_log.csv` 파일에는 10초 단위로 아래와 같은 통계가 저장됨 :
+
+```csv
+Timestamp,Average Total People,Average Perfect Ratio (%)
+2025-08-21 15:48:20,2,50.0
+2025-08-21 15:38:30,2,100.0
+...
+```
+
+- **주기** : 기본 10초 (테스트 용도) 실사용 시 1시간으로 조정 가능
+- **비율 기준** : 완전 착용자 수 / 전체 인원 x 100
+- **판단 기준** : PPE 두 가지(Hardhat + Safety Vest)가 모두 있어야 착용으로 인정됨
 
 ---
 
@@ -89,45 +136,6 @@ python scr/final/main.py
 
 ---
 
-## 폴더 구조
-
-```
-ppe_detection/
-├── assets
-├── docs
-├── feedback
-├── img
-│   └── hardhat1.mp4         # 테스트 영상
-├── models
-│   └── best.pt              # 학습된 YOLOv8 모델
-├── src
-│   └── final
-│       └── main.py          # 실행 파일
-│       └── ppe_log.csv      # 착용률 기록 파일 (자동 생성)
-│   └── prototypes
-│   └── tests 
-```
-
----
-
-## 테스트 및 결과 확인
-
-- 결과 화면에서는 실시간 감지된 사람 수 및 PPE 착용 여부가 시각적으로 표현됨
-- `ppe_log.csv` 파일에는 10초 단위로 아래와 같은 통계가 저장됨 :
-
-```csv
-Timestamp,Average Total People,Average Perfect Ratio (%)
-2025-08-21 15:48:20,2,50.0
-2025-08-21 15:38:30,2,100.0
-...
-```
-
-- **주기** : 기본 10초 (테스트 용도) 실사용 시 1시간으로 조정 가능
-- **비율 기준** : 완전 착용자 수 / 전체 인원 x 100
-- **판단 기준** : PPE 두 가지(Hardhat + Safety Vest)가 모두 있어야 착용으로 인정됨
-
----
-
 ## 진행상황
 <details>
 <summary>피드백 로그</summary>
@@ -165,8 +173,3 @@ Timestamp,Average Total People,Average Perfect Ratio (%)
 - YOLO의 감지 신뢰도(confidence) 임계값은 낮추면 더 많이 감지되지만 오류도 증가함
 - 단순 중심점 기준 착용 여부 판단이기 때문에 **겹쳐 보이는 객체는 오탐지 발생 가능**
 - 감지된 총 인원은 고유 추적이 아닌 "프레임 내 감지 기준"임
-
-## 참고 모델
-
-- 사용된 YOLOv8 모델은 다음 GitHub에서 확인 및 다운로드 가능 :
-  [github.com/snehilsanyal/Construction-Site-Safety-PPE-Detection](https://github.com/snehilsanyal/Construction-Site-Safety-PPE-Detection/tree/main/models)
