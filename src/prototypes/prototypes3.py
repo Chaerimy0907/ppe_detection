@@ -31,18 +31,10 @@ class Config:
         'alert': (30, 160),     # 경고 문구
     }
 
-# 유틸리티 함수들
+    # CSV 파일 이름
+    CVS_PATH = 'ppe_log.csv'
 
-# def is_inside(inner_box, outer_box):
-#     """
-#     작은 박스(inner)가 큰 박스(outer) 안에 완전히 들어가 있는지 확인하는 함수
-#     ex) 안전모 박스(inner)가 사람 박스(outer) 안에 들어가 있으면
-#     안전모를 착용했다고 판단
-#     """
-#     ix1, iy1, ix2, iy2 = inner_box  # 안쪽 박스 좌표
-#     ox1, oy1, ox2, oy2 = outer_box  # 바깥 박스 좌표
-#     return ix1 >= ox1 and iy1 >= oy1 and ix2 <= ox2 and iy2 <= oy2
-
+# 유틸 함수
 def box_center(box):
     """박스 중심 좌표 계산 (x1, y1, x2, y2 -> 중심점)"""
     x1, y1, x2, y2 = box
