@@ -41,6 +41,19 @@ class Config:
 #     ox1, oy1, ox2, oy2 = outer_box  # 바깥 박스 좌표
 #     return ix1 >= ox1 and iy1 >= oy1 and ix2 <= ox2 and iy2 <= oy2
 
+def box_center(box):
+    """박스 중심 좌표 계산 (x1, y1, x2, y2 -> 중심점)"""
+    x1, y1, x2, y2 = box
+    return (x1 + x2) // 2, (y1 + y2) // 2
+
+def center_inside(ppe_box, person_box):
+    """PPE의 중심점이 사람 박스 안에 들어있으면 착용한 걸로 판단
+    (기존의 def is_inside(inner_box, outer_box) 보다 더 빠르고 유연한 방식)
+    """
+    cx, cy = box_center(ppe_box)
+    x1, y1, x2, y2 = person_box
+    return x1 <= cx <= x2 and y1 <= cy <= y2
+
 def draw_text(frame, text, position, color, size=0.8, thickness=2):
     """화면에 글씨를 출력해주는 함수"""
     cv2.putText(frame, text, position, Config.TEXT_FONT, size, color, thickness)
